@@ -74,13 +74,3 @@ func parseKey(key string) (string, string) {
     channelName := parts[2]   
     return asubID, channelName
 }
-
-func parseKey(key string) (string, string) {
-	parts := strings.SplitN(key, ":", 3)
-	if len(parts) != 3 {
-		return "", ""
-	}
-	asubID := parts[1]
-	channelName := parts[2]   
-	return asubID, channelName
-}
