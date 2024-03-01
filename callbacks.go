@@ -76,7 +76,7 @@ func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{})
 	}
 }
 
-var callbackMap = map[string]func(*Callbacks, string) ([]byte, error){
+var CallbackMap = map[string]func(*Callbacks, string) ([]byte, error){
 	"interpretScanResponse":       (*Callbacks).interpretScanResponse,
 	"RegisterActiveSubscription": (*Callbacks).callLuaFunction("RegisterActiveSubscription"),
 	"SaveSubscriptionGroup":      (*Callbacks).callLuaFunction("SaveSubscriptionGroup"),
