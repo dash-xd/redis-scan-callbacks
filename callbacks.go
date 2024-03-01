@@ -5,17 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/redis/go-redis/v9"
 )
 
 type LuaResponse struct {
 	LuaResponse string `json:"luaResponse"`
-}
-
-type ScanResponse struct {
-	Keys   []string `json:"keys"`
-	Cursor uint64   `json:"cursor"`
 }
 
 type Callbacks struct {
@@ -63,10 +59,15 @@ func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{})
 }
 
 var CallbackMap = map[string]func(*Callbacks, string) ([]byte, error){
-	"RegisterActiveSubscription": func(c *Callbacks, key string) ([]byte, error) {
-		return c.callLuaFunction("RegisterActiveSubscription")(key)
-	},
 	"SaveSubscriptionGroup": func(c *Callbacks, key string) ([]byte, error) {
-		return c.callLuaFunction("SaveSubscriptionGroup")(key)
+		asubID, channelName := parseKey(key)
+		return c.callLuaFunction("SaveSubscriptionGroup", 2, asubID, channelName)(key)
 	},
+}
+
+func parseKey(key string) (string, string) {
+	parts := strings.Split(key, ":")
+	asubID := parts[1]                                   // Assuming the asubID is the second part after splitting by ":"
+	channelName := parts[len(parts)-1]                   // Assuming the channelName is the last part after splitting by ":"
+	return asubID, channelName
 }
