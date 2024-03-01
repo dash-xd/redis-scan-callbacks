@@ -42,7 +42,7 @@ func (c *Callbacks) callLuaFunction(args ...interface{}) func(string) ([]byte, e
     return func(key string) ([]byte, error) {
         result, err := c.client.Do(context.Background(), args...).Result()
         if err != nil {
-            fmt.Printf("error executing FCALL for Lua function %s: %s\n", luaFunctionName, err)
+            fmt.Printf("error executing FCALL for Lua function: %s\n", err)
             return nil, err
         }
 
