@@ -55,12 +55,12 @@ func (c *Callbacks) interpretScanResponse(keys []string, cursor uint64) ([]byte,
 	return jsonData, nil
 }
 
-func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{}) func(*Callbacks, string) {
-	return func(c *Callbacks, key string) {
+func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{}) func(*Callbacks, string) ([]byte, error) {
+	return func(c *Callbacks, key string) ([]byte, error) {
 		result, err := c.client.Do(context.Background(), "FCALL", luaFunctionName, args...).Result()
 		if err != nil {
 			fmt.Printf("error executing FCALL for Lua function %s: %s\n", luaFunctionName, err)
-			return
+			return nil, err
 		}
 
 		response := LuaResponse{
@@ -70,7 +70,7 @@ func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{})
 		jsonData, err := json.Marshal(response)
 		if err != nil {
 			fmt.Printf("error marshalling JSON: %v\n", err)
-			return
+			return nil, err
 		}
 		return jsonData, nil
 	}
