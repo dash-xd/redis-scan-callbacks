@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/go-redis/redis/v9"
 )
@@ -81,14 +80,4 @@ var callbackMap = map[string]func(*Callbacks, string){
 	"interpretScanResponse":       (*Callbacks).interpretScanResponse,
 	"RegisterActiveSubscription": (*Callbacks).callLuaFunction("RegisterActiveSubscription"),
 	"SaveSubscriptionGroup":      (*Callbacks).callLuaFunction("SaveSubscriptionGroup"),
-}
-
-func (c *Callbacks) RunCallbacks(keys []string, callbackKeys []string) {
-	for _, key := range keys {
-		for _, callbackKey := range callbackKeys {
-			if callbackFunc, ok := callbackMap[callbackKey]; ok {
-				callbackFunc(c, key)
-			}
-		}
-	}
 }
