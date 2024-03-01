@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/go-redis/redis/v9"
 )
 
 type LuaResponse struct {
@@ -72,11 +72,11 @@ func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{})
 			fmt.Printf("error marshalling JSON: %v\n", err)
 			return
 		}
-		return jsonData
+		return jsonData, nil
 	}
 }
 
-var callbackMap = map[string]func(*Callbacks, string){
+var callbackMap = map[string]func(*Callbacks, string) ([]byte, error){
 	"interpretScanResponse":       (*Callbacks).interpretScanResponse,
 	"RegisterActiveSubscription": (*Callbacks).callLuaFunction("RegisterActiveSubscription"),
 	"SaveSubscriptionGroup":      (*Callbacks).callLuaFunction("SaveSubscriptionGroup"),
