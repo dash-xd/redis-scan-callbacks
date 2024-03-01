@@ -37,7 +37,7 @@ func LazyLoadRedis(client *redis.Client) (*Callbacks, error) {
 	return &Callbacks{client: client}, nil
 }
 
-func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{}) func(string) ([]byte, error) {
+func (c *Callbacks) callLuaFunction(args ...interface{}) func(string) ([]byte, error) {
 	return func(key string) ([]byte, error) {
 		result, err := c.client.Do(context.Background(), args...).Result()
 		if err != nil {
