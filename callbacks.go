@@ -39,7 +39,7 @@ func LazyLoadRedis(client *redis.Client) (*Callbacks, error) {
 
 func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{}) func(string) ([]byte, error) {
 	return func(key string) ([]byte, error) {
-		result, err := c.client.Do(context.Background(), "FCALL", luaFunctionName, args...).Result()
+		result, err := c.client.Do(context.Background(), args...).Result()
 		if err != nil {
 			fmt.Printf("error executing FCALL for Lua function %s: %s\n", luaFunctionName, err)
 			return nil, err
@@ -61,7 +61,7 @@ func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{})
 var CallbackMap = map[string]func(*Callbacks, string) ([]byte, error){
 	"SaveSubscriptionGroup": func(c *Callbacks, key string) ([]byte, error) {
 		asubID, channelName := parseKey(key)
-		return c.callLuaFunction("SaveSubscriptionGroup", 2, asubID, channelName)(key)
+		return c.callLuaFunction("FCALL", "SaveSubscriptionGroup", 2, asubID, channelName)(key)
 	},
 }
 
