@@ -41,20 +41,6 @@ func LazyLoadRedis(client *redis.Client) (*Callbacks, error) {
 	return &Callbacks{client: client}, nil
 }
 
-func (c *Callbacks) interpretScanResponse(keys []string, cursor uint64) ([]byte, error) {
-	response := ScanResponse{
-		Keys:   keys,
-		Cursor: cursor,
-	}
-
-	jsonData, err := json.Marshal(response)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling JSON: %v", err)
-	}
-
-	return jsonData, nil
-}
-
 func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{}) func(string) ([]byte, error) {
 	return func(key string) ([]byte, error) {
 		result, err := c.client.Do(context.Background(), "FCALL", luaFunctionName, args...).Result()
@@ -77,7 +63,6 @@ func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{})
 }
 
 var CallbackMap = map[string]func(*Callbacks, string) ([]byte, error){
-	"interpretScanResponse": (*Callbacks).interpretScanResponse,
 	"RegisterActiveSubscription": func(c *Callbacks, key string) ([]byte, error) {
 		return c.callLuaFunction("RegisterActiveSubscription")(key)
 	},
