@@ -55,8 +55,8 @@ func (c *Callbacks) interpretScanResponse(keys []string, cursor uint64) ([]byte,
 	return jsonData, nil
 }
 
-func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{}) func(*Callbacks, string) ([]byte, error) {
-	return func(c *Callbacks, key string) ([]byte, error) {
+func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{}) func(string) ([]byte, error) {
+	return func(key string) ([]byte, error) {
 		result, err := c.client.Do(context.Background(), "FCALL", luaFunctionName, args...).Result()
 		if err != nil {
 			fmt.Printf("error executing FCALL for Lua function %s: %s\n", luaFunctionName, err)
@@ -77,7 +77,11 @@ func (c *Callbacks) callLuaFunction(luaFunctionName string, args ...interface{})
 }
 
 var CallbackMap = map[string]func(*Callbacks, string) ([]byte, error){
-	"interpretScanResponse":       (*Callbacks).interpretScanResponse,
-	"RegisterActiveSubscription": (*Callbacks).callLuaFunction("RegisterActiveSubscription"),
-	"SaveSubscriptionGroup":      (*Callbacks).callLuaFunction("SaveSubscriptionGroup"),
+	"interpretScanResponse": (*Callbacks).interpretScanResponse,
+	"RegisterActiveSubscription": func(c *Callbacks, key string) ([]byte, error) {
+		return c.callLuaFunction("RegisterActiveSubscription")(key)
+	},
+	"SaveSubscriptionGroup": func(c *Callbacks, key string) ([]byte, error) {
+		return c.callLuaFunction("SaveSubscriptionGroup")(key)
+	},
 }
