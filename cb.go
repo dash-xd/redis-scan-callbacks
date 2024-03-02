@@ -1,5 +1,3 @@
-// callbacks package
-
 package callbacks
 
 import (
@@ -22,7 +20,7 @@ func NewCallbacks() *Callbacks {
 	return &Callbacks{}
 }
 
-func (c *Callbacks) callLuaFunction(redisClient *redis.Client, args ...interface{}) func(string) ([]byte, error) {
+func (c *Callbacks) CallLuaFunction(redisClient *redis.Client, args ...interface{}) func(string) ([]byte, error) {
 	return func(key string) ([]byte, error) {
 		result, err := redisClient.Do(context.Background(), args...).Result()
 		if err != nil {
@@ -43,10 +41,10 @@ func (c *Callbacks) callLuaFunction(redisClient *redis.Client, args ...interface
 	}
 }
 
-var CallbackMap = map[string]func(*redis.Client, string) ([]byte, error){
-	"SaveSubscriptionGroup": func(client *redis.Client, key string) ([]byte, error) {
+var CallbackMap = map[string]func(*Callbacks, *redis.Client, string) ([]byte, error){
+	"SaveSubscriptionGroup": func(c *Callbacks, client *redis.Client, key string) ([]byte, error) {
 		asubID, channelName := parseKey(key)
-		return c.callLuaFunction(client, "FCALL", "SaveSubscriptionGroup", 2, asubID, channelName)(key)
+		return c.CallLuaFunction(client, "FCALL", "SaveSubscriptionGroup", 2, asubID, channelName)(key)
 	},
 }
 
